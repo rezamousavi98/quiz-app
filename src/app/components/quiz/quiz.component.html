@@ -1,0 +1,63 @@
+<div class="container">
+    <div class="user-info-card" *ngIf="!quizStarted">
+        <mat-card *ngIf="!usernameEntered">
+            <div class="flex-column-centered">
+                <img src="/assets/images/quiz.png" alt="quizapp" width="64">
+            </div>
+            <form [formGroup]="userForm" (ngSubmit)="setUsername()">
+                <mat-form-field class="full-width" appearance="standard">
+                    <mat-label>Enter your name</mat-label>
+                    <input matInput placeholder="Placeholder" formControlName="username" autocomplete="off">
+                </mat-form-field>
+                <button type="submit" class="full-width" 
+                mat-flat-button color="primary">Start Quiz</button>
+            </form>
+        </mat-card>
+        <mat-card class="flex-column-centered" *ngIf="usernameEntered && !quizStarted">
+            <mat-panel-title>Choose language:</mat-panel-title>
+            <div class="quiz-category">
+                <button mat-stroked-button color="primary" (click)="chooseQuiz('html')" disabled>HTML (soon)</button>
+                <button mat-stroked-button color="primary" (click)="chooseQuiz('css')" disabled>CSS (soon)</button>
+                <button mat-stroked-button color="primary" (click)="chooseQuiz('js')">JS</button>
+                <button mat-stroked-button color="primary" (click)="chooseQuiz('python')">Python</button>
+            </div>
+        </mat-card>
+    </div>
+
+    <div class="quiz-box" *ngIf="quizStarted">
+        <mat-card *ngIf="!loading">
+            <div class="flex-column-centered mb-small">
+                <img [src]="quizFinished ? '/assets/images/checked.png' : '/assets/images/quiz.png'" alt="quizapp" width="64">
+            </div>
+            <div class="flex-column-centered">
+                <mat-card-title>{{ quizFinished ? quizResult : "Question " + (activeIndex + 1).toString() }}</mat-card-title>
+                <mat-card-subtitle *ngIf="quizFinished">{{username + '! ' + generateResultText(points)}}</mat-card-subtitle>
+                <mat-card-subtitle *ngIf="!quizFinished">difficulty: {{ questions[activeIndex]?.difficulty }}</mat-card-subtitle>
+            </div>
+            <button class="full-width" mat-button color="primary" *ngIf="quizFinished"
+            (click)="resetQuiz()">Try again!</button>
+            <div class="question" *ngIf="!quizFinished">
+                <div class="question-text">
+                    <mat-card-title>{{ questions[activeIndex]?.text }}</mat-card-title>
+                </div>
+                <form [formGroup]="quizForm">
+                    <mat-radio-group class="question-options" formControlName="answer">
+                        <mat-radio-button *ngFor="let option of questions[activeIndex]?.options"
+                        [value]="option.value">{{ option.description }}</mat-radio-button>
+                    </mat-radio-group>
+                </form>
+            </div>
+            <mat-card-actions class="flex-row-reverse" *ngIf="!quizFinished">
+              <button mat-flat-button color="primary"
+              (click)="submitAnswer()"
+              [disabled]="activeIndex + 1 > questions.length">{{ activeIndex + 1 === questions.length ? "Finish": "Next"}}</button>
+            </mat-card-actions>
+        </mat-card>
+        <mat-card class="loading-card" *ngIf="loading">
+            <div class="loading-elements">
+                <mat-spinner></mat-spinner>
+                <span>Fetching quiestions</span>
+            </div>
+        </mat-card>
+    </div>
+</div>
